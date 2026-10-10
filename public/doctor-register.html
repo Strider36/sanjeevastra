@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Registration - Sanjeev Astra</title>
+  <link rel="stylesheet" href="/css/doctor.css">
+</head>
+<body>
+
+  <div class="doctor-auth-container">
+    <div class="doctor-auth-box" style="max-width: 480px;">
+      
+      <div class="doctor-auth-brand">
+        <span class="doctor-auth-brand-badge">Practitioner Enrollment</span>
+        <h1 class="doctor-auth-title">Doctor Account Registration</h1>
+        <p class="doctor-auth-desc">Submit professional credentials for clinical authority access</p>
+      </div>
+
+      <div class="doc-alert doc-alert-warning" style="margin-bottom: 20px;">
+        <div>
+          <strong>Verification Notice:</strong> In compliance with health data privacy rules, doctor accounts require administrative verification before patient records can be viewed.
+        </div>
+      </div>
+
+      <div id="register-alert" style="display: none;" class="doc-alert"></div>
+
+      <form id="doctor-register-form">
+        <div class="doc-form-group">
+          <label for="reg-name" class="doc-form-label">Full Name</label>
+          <input 
+            type="text" 
+            id="reg-name" 
+            class="doc-form-control" 
+            placeholder="Dr. Rajesh Sharma" 
+            required
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="doc-form-group">
+          <label for="reg-email" class="doc-form-label">Email Address</label>
+          <input 
+            type="email" 
+            id="reg-email" 
+            class="doc-form-control" 
+            placeholder="rajesh.sharma@hospital.org" 
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="doc-form-row" style="gap: 12px; margin-bottom: 18px;">
+          <div style="flex: 1;">
+            <label for="reg-password" class="doc-form-label">Password</label>
+            <input 
+              type="password" 
+              id="reg-password" 
+              class="doc-form-control" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+          </div>
+          <div style="flex: 1;">
+            <label for="reg-confirm-password" class="doc-form-label">Confirm Password</label>
+            <input 
+              type="password" 
+              id="reg-confirm-password" 
+              class="doc-form-control" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+          </div>
+        </div>
+
+        <div class="doc-form-group">
+          <label for="reg-license" class="doc-form-label">State / National Medical Council (NMC) ID</label>
+          <input 
+            type="text" 
+            id="reg-license" 
+            class="doc-form-control" 
+            placeholder="e.g. NMC-2022-78912 or MCI-48190" 
+            required
+          >
+        </div>
+
+        <div class="doc-form-row" style="gap: 12px; margin-bottom: 18px;">
+          <div style="flex: 1;">
+            <label for="reg-specialization" class="doc-form-label">Specialization</label>
+            <input 
+              type="text" 
+              id="reg-specialization" 
+              class="doc-form-control" 
+              placeholder="e.g. General Medicine, Cardiology" 
+              required
+            >
+          </div>
+          <div style="flex: 1;">
+            <label for="reg-phone" class="doc-form-label">Contact Phone</label>
+            <input 
+              type="tel" 
+              id="reg-phone" 
+              class="doc-form-control" 
+              placeholder="+91 98765 43210"
+              autocomplete="tel"
+            >
+          </div>
+        </div>
+
+        <div class="doc-form-group">
+          <label for="reg-hospital" class="doc-form-label">Hospital / Clinic Affiliation</label>
+          <input 
+            type="text" 
+            id="reg-hospital" 
+            class="doc-form-control" 
+            placeholder="e.g. City General Hospital / Apollo Clinic" 
+            required
+          >
+        </div>
+
+        <button type="submit" id="doctor-reg-btn" class="doc-btn doc-btn-primary" style="margin-top: 8px;">
+          Submit for Administrative Verification
+        </button>
+      </form>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--doc-border); text-align: center;">
+        <span style="font-size: 13px; color: var(--doc-text-muted);">Already registered?</span>
+        <a href="/doctor-login.html" class="doc-link" style="margin-left: 6px;">Return to Doctor Login</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="/js/doctor.js"></script>
+</body>
+</html>

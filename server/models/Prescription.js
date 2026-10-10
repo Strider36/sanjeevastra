@@ -34,6 +34,15 @@ const PrescriptionSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  rawOcrText: {
+    type: String,
+    default: ''
+  },
+  healthRecord: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'HealthRecord',
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -41,5 +50,7 @@ const PrescriptionSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+PrescriptionSchema.index({ user: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Prescription', PrescriptionSchema);

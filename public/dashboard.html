@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Sanjeev Astra</title>
   
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563EB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sanjeev Astra">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -349,6 +356,22 @@
               </button>
             </div>
 
+            <!-- Community First Responder Volunteer / Professional Mode -->
+            <div class="glass-card" id="card-responder-mode" style="border: 1.5px solid rgba(59, 130, 246, 0.2); background: linear-gradient(135deg, rgba(59, 130, 246, 0.04), rgba(6, 182, 212, 0.04));">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 6px;">
+                  <span>🛡️</span> Community Responder Mode
+                </h4>
+                <span id="responder-status-pill" class="badge badge-secondary" style="font-size: 0.7rem; font-weight: 700;">OFFLINE</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                Opt in with your live GPS location to receive nearby emergency notifications when patients need urgent assistance in your vicinity.
+              </p>
+              <button id="btn-toggle-responder" class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span>📍</span> <span id="responder-toggle-label">Opt In as Nearby Responder</span>
+              </button>
+            </div>
+
             <!-- Emergency Alert Vital Card Widget -->
             <div class="glass-card emergency-widget">
               <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
@@ -407,38 +430,156 @@
     <i data-lucide="bot" style="width: 28px; height: 28px;"></i>
   </div>
 
-  <!-- Chat drawer sidebar -->
-  <div id="chat-drawer" style="position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background-color: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow-premium); z-index: 1500; display: flex; flex-direction: column; transition: var(--transition-slow);">
-    <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.05), rgba(6, 182, 212, 0.05));">
+  <!-- Chat drawer sidebar with ElevenLabs Voice-to-Voice AI Assistant -->
+  <div id="chat-drawer" style="position: fixed; top: 0; right: -420px; width: 420px; max-width: 100vw; height: 100vh; background-color: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow-premium); z-index: 1500; display: flex; flex-direction: column; transition: var(--transition-slow);">
+    
+    <!-- Top Header Bar -->
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.06), rgba(6, 182, 212, 0.06));">
       <div style="display: flex; align-items: center; gap: 10px;">
         <div style="width: 36px; height: 36px; background-color: rgba(var(--primary-rgb), 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
           <i data-lucide="bot"></i>
         </div>
         <div>
-          <div style="font-weight: 600; font-size: 0.95rem;">Sanjeev Astra AI</div>
-          <div style="font-size: 0.7rem; color: var(--success); display: flex; align-items: center; gap: 4px;"><span>●</span> Online Guidance</div>
+          <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+            <span>Sanjeev Astra AI</span>
+            <span style="font-size: 0.65rem; background: rgba(139, 92, 246, 0.12); color: #7C3AED; padding: 2px 6px; border-radius: 4px; font-weight: 700;">VOICE+RAG</span>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--success); display: flex; align-items: center; gap: 4px;">
+            <span>●</span> Evidence-Grounded Guidance
+          </div>
         </div>
       </div>
-      <button id="btn-close-chat" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer;">&times;</button>
+
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button id="btn-voice-settings" class="btn btn-secondary btn-icon" title="Voice & Speech Settings (ElevenLabs)" style="width: 32px; height: 32px; padding: 0; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <i data-lucide="sliders" style="width: 15px; height: 15px;"></i>
+        </button>
+        <button id="btn-close-chat" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; line-height: 1; padding: 0 4px;">&times;</button>
+      </div>
+    </div>
+
+    <!-- Voice Settings Dropdown / Drawer Panel (collapsible) -->
+    <div id="voice-settings-panel" style="display: none; background: var(--background); border-bottom: 1px solid var(--border); padding: 14px 18px; font-size: 0.82rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <span>🎙️</span> Voice AI Settings (ElevenLabs)
+        </span>
+        <button id="btn-close-voice-settings" style="background: none; border: none; font-size: 1.1rem; color: var(--text-secondary); cursor: pointer;">&times;</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div>
+          <label for="voice-select" style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 4px;">Assistant Voice</label>
+          <select id="voice-select" class="form-control" style="font-size: 0.75rem; padding: 6px 8px;">
+            <option value="21m00Tcm4TlvDq8ikWAM" selected>Rachel (Calm & Clinical)</option>
+            <option value="EXAVITQu4vr4xnSDxMaL">Bella (Warm & Empathetic)</option>
+            <option value="AZnzlk1XvdvUeBnXmlld">Domi (Clear & Confident)</option>
+            <option value="ErXwobaYiN019PkySvjV">Antoni (Friendly & Reassuring)</option>
+            <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Deep & Grounded)</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="voice-lang-select" style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 4px;">Speech Language</label>
+          <select id="voice-lang-select" class="form-control" style="font-size: 0.75rem; padding: 6px 8px;">
+            <option value="en" selected>English (Indian / Global)</option>
+            <option value="hi">Hindi (हिंदी)</option>
+            <option value="mr">Marathi (मराठी)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed var(--border);">
+        <label for="voice-autoplay-toggle" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.78rem; font-weight: 500;">
+          <input type="checkbox" id="voice-autoplay-toggle" checked style="cursor: pointer;">
+          <span>🔊 Read answers aloud automatically</span>
+        </label>
+      </div>
+
+      <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 8px; line-height: 1.35; background: rgba(59, 130, 246, 0.04); padding: 6px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(59, 130, 246, 0.1);">
+        🔒 <strong>Privacy Notice</strong>: Voice audio is transcribed and synthesized using ElevenLabs Speech AI. Healthcare guidance is generated using verified medical evidence and Google Gemini.
+      </div>
+    </div>
+
+    <!-- Live Voice State Indicator Banner -->
+    <div id="voice-status-banner" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border); font-size: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span>Status:</span>
+        <span id="voice-status-pill" class="voice-status-pill voice-status-ready">Ready</span>
+      </div>
+      <div id="voice-status-hint" style="color: var(--text-secondary); font-size: 0.7rem;">
+        Speak or type your question
+      </div>
     </div>
     
     <!-- Chat disclaimer warning -->
-    <div style="background-color: rgba(245, 158, 11, 0.08); border-bottom: 1px solid rgba(245, 158, 11, 0.15); padding: 10px 20px; font-size: 0.7rem; color: #B45309; line-height: 1.4; display: flex; gap: 8px;">
-      <i data-lucide="alert-triangle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-      <span><strong>Disclaimer</strong>: Informational guidance only. Do not use for diagnostic purposes. Consult a physician for emergencies.</span>
+    <div style="background-color: rgba(245, 158, 11, 0.08); border-bottom: 1px solid rgba(245, 158, 11, 0.15); padding: 8px 16px; font-size: 0.7rem; color: #B45309; line-height: 1.35; display: flex; gap: 6px; align-items: center;">
+      <i data-lucide="alert-triangle" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+      <span><strong>Medical Notice</strong>: Educational guidance only. Consult a physician for diagnosis or emergency.</span>
     </div>
 
     <!-- Messages list -->
-    <div id="chat-messages" style="flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
-      <div style="align-self: flex-start; max-width: 80%; background-color: var(--background); padding: 12px 16px; border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md); font-size: 0.85rem; line-height: 1.5;">
-        Hello! I am your Sanjeev Astra AI Healthcare Navigation Assistant. I can help assess symptoms, recommend appropriate care levels, locate nearby facilities, or provide medicine information. How can I help you today?
+    <div id="chat-messages" style="flex-grow: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+      <div style="align-self: flex-start; max-width: 85%; background-color: var(--background); padding: 12px 16px; border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md); font-size: 0.85rem; line-height: 1.5; border: 1px solid var(--border);">
+        Hello! I am your Sanjeev Astra AI Healthcare Navigation Assistant. You can speak to me by pressing the microphone or type your question below. How can I help you today?
+      </div>
+    </div>
+
+    <!-- Live Recording In-Progress Banner (Shown while mic is active) -->
+    <div id="voice-recording-bar" style="display: none; padding: 10px 16px; background: rgba(239, 68, 68, 0.08); border-top: 1px solid rgba(239, 68, 68, 0.2); border-bottom: 1px solid rgba(239, 68, 68, 0.2); align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 8px; color: #DC2626; font-size: 0.8rem; font-weight: 600;">
+        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #EF4444; animation: voicePulse 1s infinite;"></span>
+        <span>Listening...</span>
+        <span id="voice-recording-timer" style="font-family: monospace; font-weight: 700; color: #991B1B;">0:00</span>
+        <div style="display: inline-flex; align-items: center; color: #EF4444; margin-left: 4px;">
+          <span class="audio-wave-bar"></span>
+          <span class="audio-wave-bar"></span>
+          <span class="audio-wave-bar"></span>
+          <span class="audio-wave-bar"></span>
+          <span class="audio-wave-bar"></span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <button id="btn-cancel-recording" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 8px;" title="Cancel recording">
+          ✕ Cancel
+        </button>
+        <button id="btn-stop-recording" class="btn btn-primary btn-sm" style="font-size: 0.72rem; padding: 4px 10px; background: #EF4444;" title="Stop and transcribe">
+          ✓ Done
+        </button>
+      </div>
+    </div>
+
+    <!-- Recognized Transcript Preview & Confirmation Card (Shown after STT before submit) -->
+    <div id="voice-transcript-card" style="display: none; padding: 12px 16px; background: var(--background); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 4px;">
+          <span>🎤</span> Recognized Question (ElevenLabs Scribe)
+        </span>
+        <span style="font-size: 0.7rem; color: var(--text-secondary);">Review or edit before sending</span>
+      </div>
+      <textarea id="voice-transcript-input" class="form-control" rows="2" style="font-size: 0.85rem; padding: 8px 10px; resize: none; margin-bottom: 8px; border-radius: var(--radius-sm);"></textarea>
+      <div style="display: flex; justify-content: space-between; gap: 8px;">
+        <button id="btn-retry-recording" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 10px;">
+          🔄 Re-record
+        </button>
+        <div style="display: flex; gap: 6px;">
+          <button id="btn-discard-transcript" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 10px;">
+            ✕ Discard
+          </button>
+          <button id="btn-confirm-voice-submit" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 4px 12px; font-weight: 600;">
+            ✓ Ask Assistant
+          </button>
+        </div>
       </div>
     </div>
     
     <!-- Message input field -->
-    <div style="padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 10px;">
-      <input type="text" id="chat-input" class="form-control" placeholder="Ask about medicines, conditions, diet..." style="border-radius: var(--radius-full); font-size: 0.85rem;">
-      <button class="btn btn-primary" id="btn-send-chat" style="border-radius: var(--radius-full); width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+    <div style="padding: 14px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--surface);">
+      <input type="text" id="chat-input" class="form-control" placeholder="Ask about medicines, conditions, symptoms..." style="border-radius: var(--radius-full); font-size: 0.85rem; flex: 1;">
+      <button type="button" class="btn btn-secondary voice-btn-mic" id="btn-chat-voice" title="Click to speak (ElevenLabs Voice)" style="border-radius: var(--radius-full); width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <i data-lucide="mic" style="width: 18px; height: 18px;"></i>
+      </button>
+      <button type="button" class="btn btn-primary" id="btn-send-chat" title="Send Question" style="border-radius: var(--radius-full); width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
         <i data-lucide="send" style="width: 16px; height: 16px;"></i>
       </button>
     </div>

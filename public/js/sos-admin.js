@@ -132,6 +132,17 @@ function renderDetail(req) {
   document.getElementById('detail-destination-name').textContent = req.destinationFacility ? req.destinationFacility.name : 'District Hospital';
   document.getElementById('detail-destination-addr').textContent = req.destinationFacility ? `${req.destinationFacility.address} (Phone: ${req.destinationFacility.phone})` : '';
 
+  const respBox = document.getElementById('detail-responder-box');
+  if (respBox) {
+    if (req.assignedResponder && (req.assignedResponder.name || req.assignedResponder.user)) {
+      respBox.style.display = 'block';
+      document.getElementById('detail-responder-name').textContent = `${req.assignedResponder.name || 'Community Responder'} (${req.assignedResponder.responderType || 'first responder'})`;
+      document.getElementById('detail-responder-meta').textContent = `ETA: ~${req.assignedResponder.etaMinutes || 5} mins • Phone: ${req.assignedResponder.phone || 'On file'}`;
+    } else {
+      respBox.style.display = 'none';
+    }
+  }
+
   document.getElementById('detail-ambulance-vehicle').textContent = req.ambulance ? req.ambulance.vehicleNumber : 'Pending Assignment';
   document.getElementById('detail-ambulance-driver').textContent = req.ambulance 
     ? `Driver: ${req.ambulance.driverName} • Phone: ${req.ambulance.phone}`

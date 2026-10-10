@@ -3,7 +3,7 @@
 const API_BASE = '/api';
 
 export const apiFetch = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('token');
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
   
   // Prepare headers
   options.headers = options.headers || {};
@@ -17,38 +17,91 @@ export const apiFetch = async (endpoint, options = {}) => {
     options.body = JSON.stringify(options.body);
   }
 
+  // Attach timeout signal using AbortController if supported
+  const timeoutMs = options.timeout || 35000;
+  let timeoutId = null;
+  if (!options.signal && typeof AbortController !== 'undefined') {
+    const controller = new AbortController();
+    options.signal = controller.signal;
+    timeoutId = setTimeout(() => {
+      try {
+        controller.abort();
+      } catch (e) {
+        // Ignore already completed controller
+      }
+    }, timeoutMs);
+  }
+
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, options);
+    if (timeoutId) clearTimeout(timeoutId);
     
     // Check if token expired or invalid
     if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
       logout();
-      window.location.href = '/login.html';
-      return { success: false, error: 'Session expired. Please log in again.' };
+      if (typeof window !== 'undefined' && window.location) {
+        window.location.href = '/login.html';
+      }
+      return { success: false, error: 'Session expired. Please log in again.', status: 401 };
     }
 
     const data = await response.json();
     if (!response.ok) {
-      return { success: false, error: data.error || 'Something went wrong' };
+      return {
+        success: false,
+        error: data.error || 'Something went wrong',
+        status: response.status,
+        data
+      };
     }
 
     return data;
   } catch (error) {
+    if (timeoutId) clearTimeout(timeoutId);
     console.error(`Fetch error at ${endpoint}:`, error);
-    return { success: false, error: 'Network connection failure' };
+    const isTimeout = error.name === 'AbortError' || (typeof error.message === 'string' && error.message.toLowerCase().includes('timeout'));
+    return {
+      success: false,
+      error: isTimeout ? 'Request timed out. Please try again.' : 'Network connection failure',
+      status: isTimeout ? 504 : 0,
+      isTimeout
+    };
   }
 };
 
-// Authentication state management
-export const getToken = () => localStorage.getItem('token');
-export const setToken = (token) => localStorage.setItem('token', token);
-export const removeToken = () => localStorage.removeItem('token');
+export const getToken = () => (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+export const setToken = (token) => (typeof localStorage !== 'undefined' ? localStorage.setItem('token', token) : null);
+export const removeToken = () => (typeof localStorage !== 'undefined' ? localStorage.removeItem('token') : null);
 export const isAuthenticated = () => !!getToken();
+export const getUser = () => {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('user') : null;
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+};
 
-export const logout = () => {
+export const logout = async () => {
+  try {
+    const storedUser = typeof localStorage !== 'undefined' ? localStorage.getItem('user') : null;
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    const userId = user?._id || user?.id;
+    if (userId) {
+      const { offlineStorage } = await import('./db.js');
+      await offlineStorage.purgeUserData(userId);
+    }
+  } catch (e) {
+    console.warn('[Logout] Cleanup note:', e);
+  }
+
   removeToken();
-  localStorage.removeItem('user');
-  window.location.href = '/';
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('user');
+  }
+  if (typeof window !== 'undefined' && window.location) {
+    window.location.href = '/';
+  }
 };
 
 // Central Toast Manager

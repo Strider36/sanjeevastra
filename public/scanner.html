@@ -258,7 +258,24 @@
                   <div id="rx-medicines-rows" style="display: flex; flex-direction: column; gap: 12px;"></div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 600; padding: 12px;">
+                <!-- Database Persistence Options -->
+                <div style="background: rgba(var(--primary-rgb), 0.04); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px;">
+                  <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                    <input type="checkbox" id="scan-rx-sync-records" checked style="accent-color: var(--primary); width: 16px; height: 16px;">
+                    <span>Archive scanned document in <strong>Health Records Locker</strong> (visible to authorized doctors)</span>
+                  </label>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; padding-left: 26px;">
+                    ✅ Stored in MongoDB Database (Prescription collection + HealthRecord collection + Medicine schedules)
+                  </div>
+                </div>
+
+                <!-- Collapsible Raw OCR Text Preview -->
+                <details style="margin-bottom: 16px; font-size: 0.8rem; color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--background);">
+                  <summary style="cursor: pointer; font-weight: 600;">🔍 View Raw OCR Scanned Text Extracted by AI</summary>
+                  <pre id="scan-rx-raw-text" style="margin-top: 8px; white-space: pre-wrap; font-size: 0.75rem; max-height: 120px; overflow-y: auto; background: var(--surface); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);">No OCR text extracted yet.</pre>
+                </details>
+
+                <button type="submit" class="btn btn-primary" id="btn-submit-prescription" style="width: 100%; font-weight: 600; padding: 12px;">
                   Save Prescription & Auto-Schedule Reminders
                 </button>
               </form>

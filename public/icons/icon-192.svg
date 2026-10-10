@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="grad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#grad192)" />
+  <!-- Medical Plus / Star symbol -->
+  <path d="M96 42v108M42 96h108" stroke="#38bdf8" stroke-width="20" stroke-linecap="round" />
+  <!-- Center Astra sparkle -->
+  <circle cx="96" cy="96" r="14" fill="#ffffff" />
+</svg>

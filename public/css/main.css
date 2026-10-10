@@ -290,3 +290,75 @@ a {
     align-items: stretch;
   }
 }
+
+/* Voice-to-Voice Healthcare Assistant Styles (ElevenLabs) */
+.voice-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.voice-status-ready { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.voice-status-listening { background: rgba(239, 68, 68, 0.15); color: #DC2626; animation: voicePulse 1.5s infinite; }
+.voice-status-transcribing { background: rgba(245, 158, 11, 0.15); color: #D97706; }
+.voice-status-thinking { background: rgba(59, 130, 246, 0.15); color: #2563EB; }
+.voice-status-speaking { background: rgba(139, 92, 246, 0.15); color: #7C3AED; }
+.voice-status-error { background: rgba(239, 68, 68, 0.15); color: #DC2626; }
+
+@keyframes voicePulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.speaking-active-bubble {
+  border: 1.5px solid var(--primary) !important;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.25) !important;
+  transition: var(--transition);
+}
+
+.audio-wave-bar {
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  margin: 0 1px;
+  background-color: currentColor;
+  border-radius: 2px;
+  animation: waveBar 0.8s ease-in-out infinite alternate;
+}
+.audio-wave-bar:nth-child(2) { animation-delay: 0.2s; height: 16px; }
+.audio-wave-bar:nth-child(3) { animation-delay: 0.4s; height: 20px; }
+.audio-wave-bar:nth-child(4) { animation-delay: 0.1s; height: 14px; }
+.audio-wave-bar:nth-child(5) { animation-delay: 0.3s; height: 8px; }
+
+@keyframes waveBar {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.2); }
+}
+
+.voice-player-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+}
+
+.voice-btn-mic.recording {
+  background-color: #EF4444 !important;
+  color: white !important;
+  animation: micPulse 1.2s infinite alternate;
+}
+
+@keyframes micPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  100% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}

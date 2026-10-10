@@ -3,6 +3,8 @@ import { apiFetch, showToast, triggerReminderAudio } from './api.js';
 import { triggerMedicalSos } from './sos.js';
 import { t } from './i18n.js';
 import { VoiceAssistant } from './voice.js';
+import { offlineStorage } from './db.js';
+import './networkStatus.js';
 
 let activeMedicines = [];
 let activeAppointments = [];
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupWaterTracker();
   setupSosTrigger();
   setupSanjeevAstraAI();
+  setupResponderMode();
 
   window.addEventListener('swasthya:languageChanged', () => {
     buildTodayChecklist();
@@ -162,25 +165,57 @@ function renderSanjeevGuidance(text, container) {
   });
 }
 
-// Load summary metrics, checklist, and charts
+// Load summary metrics, checklist, and charts (with IndexedDB offline fallback)
 async function loadDashboardData() {
-  // Fetch medicines
+  let storedUser = null;
+  try {
+    storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  } catch (e) {}
+  const userId = storedUser?._id || storedUser?.id;
+
+  // 1. Fetch medicines
   const medRes = await apiFetch('/medicines');
-  if (medRes.success) {
+  if (medRes.success && Array.isArray(medRes.data)) {
     activeMedicines = medRes.data;
-    document.getElementById('stat-medicines').textContent = activeMedicines.length;
+    if (userId) {
+      await offlineStorage.cacheMedicines(userId, activeMedicines);
+    }
+  } else if (userId) {
+    // Offline fallback from IndexedDB
+    activeMedicines = await offlineStorage.getMedicines(userId);
   }
 
-  // Fetch appointments
+  const statMedEl = document.getElementById('stat-medicines');
+  if (statMedEl) statMedEl.textContent = activeMedicines.length;
+
+  // 2. Fetch appointments
   const apptRes = await apiFetch('/appointments');
-  if (apptRes.success) {
+  if (apptRes.success && Array.isArray(apptRes.data)) {
     activeAppointments = apptRes.data.filter(a => a.status === 'Scheduled');
-    document.getElementById('stat-appointments').textContent = activeAppointments.length;
+    if (userId) {
+      await offlineStorage.cacheAppointments(userId, apptRes.data);
+    }
+  } else if (userId) {
+    // Offline fallback from IndexedDB
+    const cachedAppts = await offlineStorage.getAppointments(userId);
+    activeAppointments = cachedAppts.filter(a => a.status === 'Scheduled' || a.isOfflineDraft);
   }
 
-  // Compile compliance percentages & render checklist
+  const statApptEl = document.getElementById('stat-appointments');
+  if (statApptEl) statApptEl.textContent = activeAppointments.length;
+
+  // 3. Compile compliance percentages & render checklist
   buildTodayChecklist();
   calculateAdherenceTrend();
+
+  // Save compiled dashboard summary to IndexedDB
+  if (userId) {
+    await offlineStorage.saveDashboardSummary(userId, {
+      medicinesCount: activeMedicines.length,
+      appointmentsCount: activeAppointments.length,
+      compliancePercent: 0
+    });
+  }
 }
 
 // Build checklist of medications scheduled for today (YYYY-MM-DD)
@@ -493,6 +528,94 @@ function setupWaterTracker() {
       showToast('Hydrated!', 'Great job! You met your daily water intake goal of 8 glasses!', 'success');
     } else {
       showToast('Water Logged', 'Stay hydrated!', 'info');
+    }
+  });
+}
+
+// 🛡️ Community First Responder Mode Handler
+async function setupResponderMode() {
+  const toggleBtn = document.getElementById('btn-toggle-responder');
+  const statusPill = document.getElementById('responder-status-pill');
+  const label = document.getElementById('responder-toggle-label');
+
+  if (!toggleBtn || !statusPill) return;
+
+  let isAvailable = false;
+
+  const updateUI = (active) => {
+    isAvailable = active;
+    if (active) {
+      statusPill.textContent = 'ACTIVE (ONLINE)';
+      statusPill.className = 'badge badge-success';
+      if (label) label.textContent = 'Go Offline / Stop Responding';
+      toggleBtn.className = 'btn btn-outline';
+      toggleBtn.style.borderColor = 'var(--error)';
+      toggleBtn.style.color = 'var(--error)';
+    } else {
+      statusPill.textContent = 'OFFLINE';
+      statusPill.className = 'badge badge-secondary';
+      if (label) label.textContent = 'Opt In as Nearby Responder';
+      toggleBtn.className = 'btn btn-secondary';
+      toggleBtn.style.borderColor = '';
+      toggleBtn.style.color = '';
+    }
+  };
+
+  // Fetch initial profile
+  try {
+    const res = await apiFetch('/sos/responder/profile');
+    if (res && res.success && res.data && res.data.isAvailable) {
+      updateUI(true);
+    }
+  } catch (e) {
+    console.warn('Could not fetch responder profile:', e);
+  }
+
+  toggleBtn.addEventListener('click', async () => {
+    if (isAvailable) {
+      // Opt out
+      toggleBtn.disabled = true;
+      const res = await apiFetch('/sos/responder/opt-out', { method: 'POST' });
+      toggleBtn.disabled = false;
+      if (res.success) {
+        updateUI(false);
+        showToast('Responder Offline', 'You are now offline and will not receive alerts', 'info');
+      } else {
+        showToast('Error', res.error, 'error');
+      }
+    } else {
+      // Opt in: capture coordinates
+      toggleBtn.disabled = true;
+      if (!navigator.geolocation) {
+        showToast('Geolocation Required', 'Geolocation is required to opt in as a responder', 'warning');
+        toggleBtn.disabled = false;
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const res = await apiFetch('/sos/responder/opt-in', {
+            method: 'POST',
+            body: {
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+              searchRadiusKm: 15
+            }
+          });
+          toggleBtn.disabled = false;
+          if (res.success) {
+            updateUI(true);
+            showToast('Responder Mode Active', 'You are now active to receive nearby medical emergency alerts!', 'success');
+          } else {
+            showToast('Opt-In Failed', res.error, 'error');
+          }
+        },
+        (err) => {
+          toggleBtn.disabled = false;
+          showToast('Location Required', `Could not obtain GPS location: ${err.message}`, 'warning');
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
     }
   });
 }

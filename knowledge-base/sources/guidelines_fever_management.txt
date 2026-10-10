@@ -1,0 +1,27 @@
+COMMUNITY HEALTH WORKER FEVER EVALUATION AND HOME MONITORING PROTOCOL
+
+SECTION 1: CLINICAL OVERVIEW
+Fever is defined as an elevation of core body temperature exceeding 38.0 degrees Celsius (100.4 degrees Fahrenheit). In community healthcare navigation, fever is an adaptive physiological response to infection, but requires careful triage to identify underlying severe infections such as dengue, malaria, pneumonia, or bacterial meningitis.
+
+SECTION 2: DANGER SIGNS REQUIRING IMMEDIATE EMERGENCY CARE
+Patients exhibiting any of the following warning signs must seek immediate emergency medical care:
+1. Temperature exceeding 40.0 degrees Celsius (104.0 degrees Fahrenheit).
+2. Fever accompanied by a stiff neck, inability to touch chin to chest, or severe photophobia.
+3. Altered mental state, acute confusion, lethargy, or convulsive seizures.
+4. Petechial or purpuric rash (small non-blanching red or purple spots).
+5. Rapid or labored breathing, chest indrawing, or cyanosis (bluish lips or nails).
+6. Inability to retain oral liquids due to persistent vomiting.
+
+SECTION 3: CLINIC AND PHC EVALUATION
+Schedule clinical examination at a Primary Health Centre or general clinic when:
+- Fever persists for more than 3 consecutive days without improvement.
+- Accompanied by persistent productive cough, localized abdominal pain, or dysuria (painful urination).
+- Patient has known chronic comorbidities such as diabetes mellitus, chronic kidney disease, or immunosuppression.
+
+SECTION 4: HOME REHYDRATION AND COMFORT MEASURES
+For uncomplicated acute febrile illnesses without danger signs:
+- Promote abundant oral fluid intake including clean water, oral rehydration solution (ORS), and thin vegetable soups.
+- Dress the patient in light, breathable clothing; avoid heavy blankets that trap excess body heat.
+- Use lukewarm sponge baths if the patient feels uncomfortable.
+- Avoid aspirin in children and adolescents due to the risk of Reye's syndrome.
+- Monitor temperature every 4 to 6 hours and log values.

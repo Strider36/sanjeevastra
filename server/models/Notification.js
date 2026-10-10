@@ -16,7 +16,7 @@ const NotificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['Medicine', 'Appointment', 'Health', 'System'],
+    enum: ['Medicine', 'Appointment', 'Health', 'System', 'Emergency'],
     default: 'System'
   },
   isRead: {
@@ -30,5 +30,7 @@ const NotificationSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+NotificationSchema.index({ user: 1, isRead: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Notification', NotificationSchema);

@@ -5,19 +5,27 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node server.js",
+    "test": "node test/databaseAudit.test.js && node test/featuresIntegration.test.js && node test/ragChat.test.js && node test/documentIngestion.test.js && node test/vectorRetrieval.test.js && node test/ragAnswer.test.js && node test/ragFrontend.test.js && node test/ragEvaluation.test.js && node test/geminiService.test.js && node test/ragRetrievalCases.test.js && node test/healthcareSafetyCases.test.js && node test/geminiEmbeddingService.test.js && node test/doctorSharing.test.js && node test/emergencySos.test.js && node test/voiceService.test.js && node test/offlineStack.test.js && node test/doctorPortalUI.test.js",
+    "test:eval": "node scripts/runRagEvaluation.js",
+    "test:smoke": "node scripts/smokeTestGemini.js",
+    "ingest:medical": "node scripts/ingestMedicalDocs.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/genai": "^2.28.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
+    "dexie": "^4.4.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.8.0",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "openai": "^7.31.0",
+    "pdf-parse": "^2.4.5"
   }
 }

@@ -26,13 +26,30 @@ exports.register = async (req, res) => {
     }
 
     // Create user (password is hashed in pre-save middleware)
+    const allowedRoles = ['patient', 'doctor', 'health_worker'];
+    const assignedRole = allowedRoles.includes(req.body.role) ? req.body.role : 'patient';
     const user = await User.create({
       name,
       email,
       password,
-      role: req.body.role || 'patient',
+      role: assignedRole,
       phone: req.body.phone || ''
     });
+
+    if (assignedRole === 'doctor') {
+      const DoctorProfile = require('../models/DoctorProfile');
+      await DoctorProfile.create({
+        user: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        medicalRegistrationNumber: req.body.medicalRegistrationNumber || `DOC-${Date.now()}`,
+        specialization: req.body.specialization || 'General Medicine',
+        hospitalAffiliation: req.body.hospitalAffiliation || 'Affiliated Clinic / Hospital',
+        qualifications: req.body.qualifications || ['MBBS'],
+        verificationStatus: 'pending'
+      });
+    }
 
     if (user) {
       res.status(201).json({

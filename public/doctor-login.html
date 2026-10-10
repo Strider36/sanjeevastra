@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor & Authority Login - Sanjeev Astra</title>
+  <link rel="stylesheet" href="/css/doctor.css">
+</head>
+<body>
+
+  <div class="doctor-auth-container">
+    <div class="doctor-auth-box">
+      
+      <div class="doctor-auth-brand">
+        <span class="doctor-auth-brand-badge">Clinical Authority</span>
+        <h1 class="doctor-auth-title">Doctor Portal Login</h1>
+        <p class="doctor-auth-desc">Secure access for verified medical practitioners</p>
+      </div>
+
+      <div id="login-alert" style="display: none;" class="doc-alert doc-alert-danger"></div>
+
+      <form id="doctor-login-form">
+        <div class="doc-form-group">
+          <label for="doctor-email" class="doc-form-label">Email Address</label>
+          <input 
+            type="email" 
+            id="doctor-email" 
+            class="doc-form-control" 
+            placeholder="doctor@hospital.org" 
+            required 
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="doc-form-group">
+          <div class="doc-form-row">
+            <label for="doctor-password" class="doc-form-label" style="margin-bottom: 0;">Password</label>
+            <a href="#" id="doctor-forgot-password" class="doc-link">Forgot Password?</a>
+          </div>
+          <input 
+            type="password" 
+            id="doctor-password" 
+            class="doc-form-control" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" id="doctor-login-btn" class="doc-btn doc-btn-primary">
+          Log In
+        </button>
+      </form>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--doc-border); text-align: center;">
+        <span style="font-size: 13px; color: var(--doc-text-muted);">Need a clinician account?</span>
+        <a href="/doctor-register.html" class="doc-link" style="margin-left: 6px;">Register for Verification</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Minimal Forgot Password Modal -->
+  <div id="forgot-modal" class="doc-modal-overlay" style="display: none;">
+    <div class="doc-modal-dialog" style="max-width: 440px;">
+      <div class="doc-modal-header">
+        <h3 class="doc-modal-title">Password Reset Assistance</h3>
+        <button type="button" class="doc-modal-close" id="close-forgot-modal">&times;</button>
+      </div>
+      <div style="font-size: 13px; color: var(--doc-text-muted); line-height: 1.5; margin-bottom: 16px;">
+        To protect patient confidentiality and verify clinician identity under medical governance regulations, password resets require authorization.
+      </div>
+      <div class="doc-alert doc-alert-info">
+        Please email hospital administration or IT security at <strong>admin@sanjeevastra.gov.in</strong> with your National Medical Commission (NMC) registration number.
+      </div>
+      <button type="button" class="doc-btn doc-btn-secondary" style="width: 100%;" id="dismiss-forgot-modal">Understood</button>
+    </div>
+  </div>
+
+  <script type="module" src="/js/doctor.js"></script>
+</body>
+</html>

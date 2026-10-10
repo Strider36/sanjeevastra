@@ -1,0 +1,631 @@
+/* Sanjeev Astra - Doctor & Authority Portal Stylesheet */
+/* Clean, minimal design: white background, subtle teal accents */
+
+:root {
+  --doc-bg: #ffffff;
+  --doc-surface: #ffffff;
+  --doc-sidebar-bg: #f8fafc;
+  --doc-border: #e2e8f0;
+  --doc-border-subtle: #f1f5f9;
+  --doc-text: #0f172a;
+  --doc-text-muted: #64748b;
+  --doc-text-light: #94a3b8;
+  
+  /* Subtle Teal Accent Palette */
+  --doc-teal: #0d9488;
+  --doc-teal-hover: #0f766e;
+  --doc-teal-active: #115e59;
+  --doc-teal-light: #f0fdfa;
+  --doc-teal-border: #99f6e4;
+  --doc-teal-subtle: #ccfbf1;
+  
+  /* Status Colors */
+  --doc-success: #15803d;
+  --doc-success-bg: #f0fdf4;
+  --doc-success-border: #bbf7d0;
+  
+  --doc-warning: #b45309;
+  --doc-warning-bg: #fffbeb;
+  --doc-warning-border: #fde68a;
+  
+  --doc-danger: #b91c1c;
+  --doc-danger-bg: #fef2f2;
+  --doc-danger-border: #fecaca;
+  
+  --doc-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --doc-radius: 6px;
+  --doc-radius-lg: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--doc-font);
+  background-color: var(--doc-bg);
+  color: var(--doc-text);
+  line-height: 1.5;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ----------------------------------------------------
+   LOGIN & REGISTRATION PAGES (Minimal, Clean)
+   ---------------------------------------------------- */
+.doctor-auth-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px;
+  background-color: var(--doc-bg);
+}
+
+.doctor-auth-box {
+  width: 100%;
+  max-width: 400px;
+  background: var(--doc-surface);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius-lg);
+  padding: 36px 32px;
+}
+
+.doctor-auth-brand {
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.doctor-auth-brand-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--doc-teal);
+  background-color: var(--doc-teal-light);
+  border: 1px solid var(--doc-teal-border);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.doctor-auth-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--doc-text);
+  letter-spacing: -0.01em;
+}
+
+.doctor-auth-desc {
+  font-size: 13px;
+  color: var(--doc-text-muted);
+  margin-top: 4px;
+}
+
+/* Minimal Form Fields */
+.doc-form-group {
+  margin-bottom: 18px;
+}
+
+.doc-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--doc-text);
+  margin-bottom: 6px;
+}
+
+.doc-form-control {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--doc-text);
+  background-color: #ffffff;
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.doc-form-control:focus {
+  border-color: var(--doc-teal);
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+}
+
+.doc-form-control::placeholder {
+  color: var(--doc-text-light);
+}
+
+textarea.doc-form-control {
+  height: auto;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.doc-form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.doc-link {
+  font-size: 13px;
+  color: var(--doc-teal);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.doc-link:hover {
+  text-decoration: underline;
+  color: var(--doc-teal-hover);
+}
+
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: var(--doc-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.doc-btn-primary {
+  width: 100%;
+  background-color: var(--doc-teal);
+  color: #ffffff;
+  border-color: var(--doc-teal);
+}
+
+.doc-btn-primary:hover {
+  background-color: var(--doc-teal-hover);
+  border-color: var(--doc-teal-hover);
+}
+
+.doc-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.doc-btn-secondary {
+  background-color: #ffffff;
+  color: var(--doc-text);
+  border-color: var(--doc-border);
+}
+
+.doc-btn-secondary:hover {
+  background-color: var(--doc-sidebar-bg);
+}
+
+.doc-btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.doc-btn-danger {
+  background-color: var(--doc-danger);
+  color: #ffffff;
+  border-color: var(--doc-danger);
+}
+
+.doc-btn-danger:hover {
+  background-color: #991b1b;
+}
+
+/* Minimal Alert Banner */
+.doc-alert {
+  padding: 12px 14px;
+  border-radius: var(--doc-radius);
+  font-size: 13px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.doc-alert-info {
+  background-color: var(--doc-teal-light);
+  border: 1px solid var(--doc-teal-border);
+  color: #0f766e;
+}
+
+.doc-alert-warning {
+  background-color: var(--doc-warning-bg);
+  border: 1px solid var(--doc-warning-border);
+  color: var(--doc-warning);
+}
+
+.doc-alert-danger {
+  background-color: var(--doc-danger-bg);
+  border: 1px solid var(--doc-danger-border);
+  color: var(--doc-danger);
+}
+
+.doc-alert-success {
+  background-color: var(--doc-success-bg);
+  border: 1px solid var(--doc-success-border);
+  color: var(--doc-success);
+}
+
+/* ----------------------------------------------------
+   DOCTOR DASHBOARD LAYOUT
+   ---------------------------------------------------- */
+.doctor-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--doc-bg);
+}
+
+/* Clean Top Navigation Bar */
+.doc-navbar {
+  height: 60px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--doc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.doc-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.doc-navbar-logo-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--doc-text);
+  letter-spacing: -0.01em;
+}
+
+.doc-navbar-subtitle {
+  font-size: 12px;
+  color: var(--doc-teal);
+  font-weight: 600;
+  border-left: 1px solid var(--doc-border);
+  padding-left: 12px;
+}
+
+.doc-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.doc-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.doc-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+.doc-status-verified {
+  background-color: var(--doc-teal-light);
+  color: var(--doc-teal);
+  border: 1px solid var(--doc-teal-border);
+}
+
+.doc-status-pending {
+  background-color: var(--doc-warning-bg);
+  color: var(--doc-warning);
+  border: 1px solid var(--doc-warning-border);
+}
+
+.doc-status-rejected {
+  background-color: var(--doc-danger-bg);
+  color: var(--doc-danger);
+  border: 1px solid var(--doc-danger-border);
+}
+
+/* Navigation Tabs */
+.doc-tabs-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--doc-border);
+  padding: 0 24px;
+  display: flex;
+  gap: 28px;
+}
+
+.doc-tab-btn {
+  background: none;
+  border: none;
+  padding: 14px 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--doc-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.doc-tab-btn:hover {
+  color: var(--doc-text);
+}
+
+.doc-tab-btn.active {
+  color: var(--doc-teal);
+  border-bottom-color: var(--doc-teal);
+  font-weight: 600;
+}
+
+.doc-tab-count {
+  font-size: 11px;
+  font-weight: 600;
+  background-color: var(--doc-border);
+  color: var(--doc-text);
+  padding: 1px 6px;
+  border-radius: 9999px;
+}
+
+.doc-tab-btn.active .doc-tab-count {
+  background-color: var(--doc-teal-subtle);
+  color: var(--doc-teal-active);
+}
+
+/* Main Content Area */
+.doc-main-content {
+  flex: 1;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.doc-tab-pane {
+  display: none;
+}
+
+.doc-tab-pane.active {
+  display: block;
+}
+
+/* Section Header */
+.doc-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.doc-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--doc-text);
+}
+
+.doc-section-desc {
+  font-size: 13px;
+  color: var(--doc-text-muted);
+  margin-top: 2px;
+}
+
+/* Clean Table */
+.doc-table-container {
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  overflow-x: auto;
+  background-color: #ffffff;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.doc-table th {
+  background-color: var(--doc-sidebar-bg);
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--doc-text-muted);
+  border-bottom: 1px solid var(--doc-border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.doc-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--doc-border);
+  vertical-align: middle;
+}
+
+.doc-table tr:last-child td {
+  border-bottom: none;
+}
+
+.doc-table tr:hover td {
+  background-color: #fafbfc;
+}
+
+/* Clean Empty State */
+.doc-empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px dashed var(--doc-border);
+  border-radius: var(--doc-radius);
+  background-color: #fafbfc;
+}
+
+.doc-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--doc-text);
+  margin-bottom: 4px;
+}
+
+.doc-empty-desc {
+  font-size: 13px;
+  color: var(--doc-text-muted);
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Notifications List */
+.doc-notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.doc-notif-item {
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  padding: 14px 16px;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.doc-notif-item.unread {
+  border-left: 3px solid var(--doc-teal);
+  background-color: #fafdfc;
+}
+
+.doc-notif-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--doc-text);
+}
+
+.doc-notif-msg {
+  font-size: 13px;
+  color: var(--doc-text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.doc-notif-meta {
+  font-size: 12px;
+  color: var(--doc-text-light);
+  margin-top: 6px;
+}
+
+/* Profile Form Grid */
+.doc-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .doc-profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.doc-card-minimal {
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  background: #ffffff;
+  padding: 20px;
+}
+
+/* Modal Dialog (Clean, Minimal) */
+.doc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.doc-modal-dialog {
+  width: 100%;
+  max-width: 580px;
+  background: #ffffff;
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius-lg);
+  padding: 24px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.doc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--doc-border);
+  padding-bottom: 12px;
+}
+
+.doc-modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--doc-text);
+}
+
+.doc-modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--doc-text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.doc-modal-close:hover {
+  color: var(--doc-text);
+}
+
+/* Minimalist Toast */
+.doc-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: var(--doc-radius);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 2000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

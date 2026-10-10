@@ -9,7 +9,9 @@ export const SUPPORTED_LANGUAGES = [
 const DEFAULT_LANG = 'en';
 const STORAGE_KEY = 'swasthya_lang';
 
-let currentLanguage = localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG;
+let currentLanguage = (typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function'
+  ? localStorage.getItem(STORAGE_KEY)
+  : null) || DEFAULT_LANG;
 let localeData = {};
 let isLoaded = false;
 let loadPromise = null;
@@ -64,7 +66,9 @@ export async function setLanguage(newLang) {
   }
 
   currentLanguage = newLang;
-  localStorage.setItem(STORAGE_KEY, newLang);
+  if (typeof localStorage !== 'undefined' && typeof localStorage.setItem === 'function') {
+    localStorage.setItem(STORAGE_KEY, newLang);
+  }
 
   if (!localeData[newLang]) {
     const data = await fetchLocale(newLang);

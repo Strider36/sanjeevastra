@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Health Records - Sanjeev Astra</title>
   
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563EB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sanjeev Astra">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -121,12 +128,35 @@
         
         <div class="page-header" style="margin-bottom: 0;">
           <div>
-            <h2 class="page-title">Digital Health Locker</h2>
-            <p class="page-subtitle">Secure cloud storage for clinical documentation.</p>
+            <h2 class="page-title" id="page-title-text">Digital Health Locker</h2>
+            <p class="page-subtitle" id="page-subtitle-text">Secure cloud storage for clinical documentation.</p>
           </div>
-          <button class="btn btn-primary" id="btn-open-record-modal">
-            <i data-lucide="plus"></i> Upload Document
-          </button>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btn-open-active-shares" style="display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="shield-check"></i> <span id="shares-btn-label">Shared Consents & Audit</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-open-share-modal" style="display: flex; align-items: center; gap: 6px; border-color: var(--primary); color: var(--primary);">
+              <i data-lucide="share-2"></i> <span>Share with Doctor</span>
+            </button>
+            <button class="btn btn-primary" id="btn-open-record-modal" style="display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="plus"></i> <span>Upload Document</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Doctor Verification Alert (shown when doctor is unverified) -->
+        <div id="doctor-verification-banner" style="display: none; background: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 16px 20px; margin-top: 20px; margin-bottom: 4px;">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="font-size: 1.5rem;">⏳</div>
+            <div>
+              <div style="font-weight: 700; color: #B45309; font-size: 0.95rem;">
+                Doctor Verification Status: <span id="doc-status-badge" class="badge badge-warning">Pending Review</span>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;">
+                Your medical registration license is currently being reviewed by administrative authorities. Access to shared patient records is restricted until verification is formally approved.
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Filter & Search bar row -->
@@ -205,6 +235,139 @@
           <button type="submit" class="btn btn-primary" id="btn-record-submit">Upload Record</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Patient Share Record with Doctor Modal Dialog -->
+  <div class="modal-backdrop" id="share-modal">
+    <div class="modal-dialog" style="max-width: 560px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Share Health Records with Doctor</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 2px 0 0;">
+            Patient-controlled authorization: specify doctor, documents, permissions, and expiry.
+          </p>
+        </div>
+        <button class="modal-close" id="share-modal-close">&times;</button>
+      </div>
+
+      <form id="share-record-form">
+        <!-- Doctor Selector -->
+        <div class="form-group">
+          <label for="share-doctor-select" class="form-label" style="font-weight: 600;">Select Verified Doctor</label>
+          <select id="share-doctor-select" class="form-control" required>
+            <option value="" disabled selected>Loading verified doctors...</option>
+          </select>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
+            🔒 Only officially verified medical practitioners appear in this directory.
+          </div>
+        </div>
+
+        <!-- Scope: All Records vs Specific Records -->
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Record Access Scope</label>
+          <div style="display: flex; gap: 16px; margin-bottom: 10px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="share-scope" value="all" id="share-scope-all">
+              <span>All Medical Records (Complete Locker)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="share-scope" value="specific" id="share-scope-specific" checked>
+              <span>Select Specific Documents</span>
+            </label>
+          </div>
+
+          <!-- Specific Documents Checklist -->
+          <div id="share-specific-records-box" style="max-height: 160px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px; background: var(--background);">
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Loading your records...</div>
+          </div>
+        </div>
+
+        <!-- Permissions -->
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Granted Permissions</label>
+          <div style="display: flex; gap: 20px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: not-allowed;">
+              <input type="checkbox" id="perm-read" checked disabled>
+              <span>View & Read (Mandatory)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="checkbox" id="perm-download">
+              <span>Allow File Download</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <!-- Expiration Period -->
+          <div class="form-group">
+            <label for="share-expiry-days" class="form-label" style="font-weight: 600;">Access Duration</label>
+            <select id="share-expiry-days" class="form-control">
+              <option value="1">24 Hours (Immediate Consultation)</option>
+              <option value="7">7 Days (Follow-up)</option>
+              <option value="30" selected>30 Days (Standard Care)</option>
+              <option value="90">90 Days (Ongoing Treatment)</option>
+              <option value="365">1 Year (Long-term Physician)</option>
+            </select>
+          </div>
+
+          <!-- Clinical Purpose -->
+          <div class="form-group">
+            <label for="share-purpose" class="form-label" style="font-weight: 600;">Clinical Purpose / Reason</label>
+            <input type="text" id="share-purpose" class="form-control" placeholder="e.g. Second opinion, Post-op review">
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 16px;">
+          <button type="button" class="btn btn-secondary" id="share-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-share-submit" style="display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="shield-check"></i> Authorize & Grant Access
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Active Shares & Consent Management Drawer / Modal -->
+  <div class="modal-backdrop" id="active-shares-modal">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Record Sharing Consents & Audit Trail</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 2px 0 0;">
+            Real-time tracking of who has access to your health vault and when records were viewed.
+          </p>
+        </div>
+        <button class="modal-close" id="active-shares-modal-close">&times;</button>
+      </div>
+
+      <!-- Tabs: Active Grants vs Access Audit Trail -->
+      <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+        <button class="btn btn-secondary active" id="tab-btn-active-grants" style="font-size: 0.85rem; padding: 6px 14px;">
+          Active Doctor Access Grants (<span id="active-grants-count">0</span>)
+        </button>
+        <button class="btn btn-secondary" id="tab-btn-audit-logs" style="font-size: 0.85rem; padding: 6px 14px;">
+          Security Access Audit Trail
+        </button>
+      </div>
+
+      <!-- Tab Content: Active Grants -->
+      <div id="tab-content-active-grants">
+        <div id="active-grants-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;">
+          <div style="text-align: center; color: var(--text-secondary); padding: 30px;">Loading active sharing consents...</div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Audit Logs -->
+      <div id="tab-content-audit-logs" style="display: none;">
+        <div id="audit-logs-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;">
+          <div style="text-align: center; color: var(--text-secondary); padding: 30px;">Loading access history logs...</div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" id="active-shares-modal-dismiss">Close</button>
+      </div>
     </div>
   </div>
 

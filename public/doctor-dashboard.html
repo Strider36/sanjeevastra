@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard - Sanjeev Astra</title>
+  <link rel="stylesheet" href="/css/doctor.css">
+</head>
+<body class="doctor-layout">
+
+  <!-- Top Navigation Header -->
+  <header class="doc-navbar">
+    <div class="doc-navbar-brand">
+      <span class="doc-navbar-logo-title">Sanjeev Astra</span>
+      <span class="doc-navbar-subtitle">Doctor & Authority Portal</span>
+    </div>
+
+    <div class="doc-navbar-actions">
+      <div class="doc-user-badge">
+        <span id="doc-nav-name" style="font-weight: 600;">Dr. Clinician</span>
+        <span id="doc-nav-status" class="doc-status-pill doc-status-pending">Pending Review</span>
+      </div>
+      <button type="button" id="doc-logout-btn" class="doc-btn doc-btn-secondary doc-btn-sm">
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="doc-tabs-bar" aria-label="Portal Navigation">
+    <button type="button" class="doc-tab-btn active" data-tab="records" id="tab-btn-records">
+      Shared Records
+      <span class="doc-tab-count" id="count-shared-records">0</span>
+    </button>
+    <button type="button" class="doc-tab-btn" data-tab="notifications" id="tab-btn-notifications">
+      Notifications
+      <span class="doc-tab-count" id="count-unread-notifs">0</span>
+    </button>
+    <button type="button" class="doc-tab-btn" data-tab="profile" id="tab-btn-profile">
+      Profile
+    </button>
+    <button type="button" class="doc-tab-btn" data-tab="admin-verify" id="tab-btn-admin-verify" style="display: none;">
+      Admin Verification
+      <span class="doc-tab-count" id="count-pending-verifications">0</span>
+    </button>
+  </nav>
+
+  <!-- Main Portal Content -->
+  <main class="doc-main-content">
+    
+    <!-- Status Alert Banner (Shown if unverified) -->
+    <div id="unverified-banner" class="doc-alert doc-alert-warning" style="display: none;">
+      <div>
+        <strong>Verification Pending:</strong> Your medical credentials have been submitted and are undergoing administrative review. Under patient data protection standards, patient records can only be viewed once your credentials have been verified.
+      </div>
+    </div>
+
+    <!-- ==============================================
+         TAB 1: SHARED RECORDS
+         ============================================== -->
+    <section id="pane-records" class="doc-tab-pane active">
+      <div class="doc-section-header">
+        <div>
+          <h2 class="doc-section-title">Shared Patient Records</h2>
+          <p class="doc-section-desc">Medical records authorized by patients under active consent grants</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input 
+            type="text" 
+            id="records-search-input" 
+            class="doc-form-control" 
+            placeholder="Filter by patient or record..." 
+            style="width: 240px; height: 36px;"
+          >
+          <button type="button" id="refresh-records-btn" class="doc-btn doc-btn-secondary doc-btn-sm">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Consent Notice -->
+      <div class="doc-alert doc-alert-info" style="margin-bottom: 16px;">
+        <div>
+          ℹ️ <strong>Consent-Governed Access:</strong> Only records with an active, unexpired patient consent grant are displayed. Access automatically terminates upon patient revocation or expiration.
+        </div>
+      </div>
+
+      <!-- Records Table Container -->
+      <div id="records-table-wrapper" class="doc-table-container">
+        <table class="doc-table" id="shared-records-table">
+          <thead>
+            <tr>
+              <th>Patient Name</th>
+              <th>Demographics</th>
+              <th>Record Name</th>
+              <th>Category</th>
+              <th>Consent Expires</th>
+              <th>Permission</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="shared-records-body">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 32px; color: var(--doc-text-muted);">
+                Loading shared records...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="records-empty-state" class="doc-empty-state" style="display: none;">
+        <div class="doc-empty-title">No Shared Patient Records</div>
+        <div class="doc-empty-desc">
+          There are currently no active patient consent grants shared with your account. When patients authorize access, their records will appear here.
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 2: NOTIFICATIONS
+         ============================================== -->
+    <section id="pane-notifications" class="doc-tab-pane">
+      <div class="doc-section-header">
+        <div>
+          <h2 class="doc-section-title">Notifications</h2>
+          <p class="doc-section-desc">Clinical updates, consent grants, revocations, and system alerts</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="mark-all-read-btn" class="doc-btn doc-btn-secondary doc-btn-sm">
+            Mark All as Read
+          </button>
+          <button type="button" id="refresh-notifs-btn" class="doc-btn doc-btn-secondary doc-btn-sm">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div id="notifications-list" class="doc-notifications-list">
+        <div style="text-align: center; padding: 32px; color: var(--doc-text-muted);">
+          Loading notifications...
+        </div>
+      </div>
+
+      <div id="notifs-empty-state" class="doc-empty-state" style="display: none;">
+        <div class="doc-empty-title">No Notifications</div>
+        <div class="doc-empty-desc">You are completely up to date.</div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 3: DOCTOR PROFILE
+         ============================================== -->
+    <section id="pane-profile" class="doc-tab-pane">
+      <div class="doc-section-header">
+        <div>
+          <h2 class="doc-section-title">Doctor Profile & Credentials</h2>
+          <p class="doc-section-desc">Manage clinical qualifications, affiliations, and council registration</p>
+        </div>
+      </div>
+
+      <div class="doc-card-minimal">
+        <div id="profile-alert" style="display: none;" class="doc-alert"></div>
+
+        <form id="doctor-profile-form">
+          <div class="doc-profile-grid">
+            
+            <div class="doc-form-group">
+              <label class="doc-form-label">Practitioner Name</label>
+              <input type="text" id="prof-name" class="doc-form-control" disabled style="background-color: var(--doc-sidebar-bg);">
+            </div>
+
+            <div class="doc-form-group">
+              <label class="doc-form-label">Email Address</label>
+              <input type="email" id="prof-email" class="doc-form-control" disabled style="background-color: var(--doc-sidebar-bg);">
+            </div>
+
+            <div class="doc-form-group">
+              <label for="prof-license" class="doc-form-label">State / NMC Registration Number</label>
+              <input type="text" id="prof-license" class="doc-form-control" required>
+              <small style="font-size: 11px; color: var(--doc-text-muted);">Editing this will reset verification status to Pending Review.</small>
+            </div>
+
+            <div class="doc-form-group">
+              <label for="prof-specialization" class="doc-form-label">Clinical Specialization</label>
+              <input type="text" id="prof-specialization" class="doc-form-control" required>
+            </div>
+
+            <div class="doc-form-group">
+              <label for="prof-hospital" class="doc-form-label">Hospital / Clinic Affiliation</label>
+              <input type="text" id="prof-hospital" class="doc-form-control" required>
+            </div>
+
+            <div class="doc-form-group">
+              <label for="prof-qualifications" class="doc-form-label">Medical Qualifications</label>
+              <input type="text" id="prof-qualifications" class="doc-form-control" placeholder="e.g. MBBS, MD (Medicine)">
+            </div>
+
+            <div class="doc-form-group">
+              <label for="prof-experience" class="doc-form-label">Years of Experience</label>
+              <input type="number" id="prof-experience" class="doc-form-control" min="0" max="60">
+            </div>
+
+            <div class="doc-form-group">
+              <label class="doc-form-label">Verification Status</label>
+              <div id="prof-status-display" style="padding-top: 8px;">
+                <span class="doc-status-pill doc-status-pending">Pending Review</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="doc-form-group" style="margin-top: 8px;">
+            <label for="prof-bio" class="doc-form-label">Professional Summary / Bio</label>
+            <textarea id="prof-bio" class="doc-form-control" placeholder="Clinical experience, areas of interest, practice timings..."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button type="submit" id="save-profile-btn" class="doc-btn doc-btn-primary" style="width: auto; padding: 0 24px;">
+              Save Profile Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 4: ADMIN VERIFICATION (Only shown if admin)
+         ============================================== -->
+    <section id="pane-admin-verify" class="doc-tab-pane">
+      <div class="doc-section-header">
+        <div>
+          <h2 class="doc-section-title">Pending Doctor Verification Requests</h2>
+          <p class="doc-section-desc">Review and approve credentials of newly registered clinicians</p>
+        </div>
+        <button type="button" id="refresh-pending-btn" class="doc-btn doc-btn-secondary doc-btn-sm">
+          Refresh List
+        </button>
+      </div>
+
+      <div class="doc-table-container">
+        <table class="doc-table" id="pending-doctors-table">
+          <thead>
+            <tr>
+              <th>Doctor Name</th>
+              <th>Email</th>
+              <th>NMC Registration No</th>
+              <th>Specialization</th>
+              <th>Hospital Affiliation</th>
+              <th>Applied On</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pending-doctors-body">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 32px; color: var(--doc-text-muted);">
+                Loading pending applications...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="pending-empty-state" class="doc-empty-state" style="display: none;">
+        <div class="doc-empty-title">No Pending Requests</div>
+        <div class="doc-empty-desc">All doctor registrations have been reviewed.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==============================================
+       RECORD DETAILS INSPECTOR MODAL
+       ============================================== -->
+  <div id="record-details-modal" class="doc-modal-overlay" style="display: none;">
+    <div class="doc-modal-dialog">
+      <div class="doc-modal-header">
+        <h3 class="doc-modal-title" id="modal-record-title">Medical Record Details</h3>
+        <button type="button" class="doc-modal-close" id="close-record-modal">&times;</button>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
+        <div class="doc-card-minimal" style="padding: 12px 14px; background-color: var(--doc-sidebar-bg);">
+          <div style="font-weight: 600; color: var(--doc-text); margin-bottom: 4px;" id="modal-patient-name">Patient Name</div>
+          <div style="color: var(--doc-text-muted);" id="modal-patient-meta">Age: -- | Blood Group: -- | Contact: --</div>
+        </div>
+
+        <div class="doc-profile-grid" style="gap: 10px;">
+          <div>
+            <span style="color: var(--doc-text-muted);">Category:</span>
+            <div style="font-weight: 500;" id="modal-category">Lab Report</div>
+          </div>
+          <div>
+            <span style="color: var(--doc-text-muted);">Record Date:</span>
+            <div style="font-weight: 500;" id="modal-date">2026-10-10</div>
+          </div>
+          <div>
+            <span style="color: var(--doc-text-muted);">Consent Expiry:</span>
+            <div style="font-weight: 500; color: var(--doc-teal);" id="modal-expiry">24 hours remaining</div>
+          </div>
+          <div>
+            <span style="color: var(--doc-text-muted);">Granted Permission:</span>
+            <div style="font-weight: 500;" id="modal-permission">View Only</div>
+          </div>
+        </div>
+
+        <div>
+          <span style="color: var(--doc-text-muted); display: block; margin-bottom: 4px;">Clinical Notes / Findings:</span>
+          <div id="modal-notes" style="background: #ffffff; border: 1px solid var(--doc-border); padding: 10px; border-radius: var(--doc-radius); white-space: pre-wrap; min-height: 50px;">
+            No specific clinical notes attached to this record.
+          </div>
+        </div>
+
+        <div id="modal-file-wrapper" style="margin-top: 4px;">
+          <a href="#" id="modal-file-link" target="_blank" class="doc-btn doc-btn-secondary" style="width: 100%;">
+            Open Attached Medical Document
+          </a>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button type="button" class="doc-btn doc-btn-secondary doc-btn-sm" id="dismiss-record-modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="doc-toast" class="doc-toast" style="display: none;"></div>
+
+  <script type="module" src="/js/doctor.js"></script>
+</body>
+</html>

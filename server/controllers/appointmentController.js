@@ -56,7 +56,10 @@ exports.updateAppointment = async (req, res) => {
       return res.status(401).json({ success: false, error: 'Not authorized' });
     }
 
-    appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, {
+    const updates = { ...req.body };
+    delete updates.user;
+
+    appointment = await Appointment.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true
     });

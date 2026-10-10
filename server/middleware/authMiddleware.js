@@ -12,6 +12,10 @@ const protect = async (req, res, next) => {
       // Get token from header
       token = req.headers.authorization.split(' ')[1];
 
+      if (!token || !token.trim() || token === 'null' || token === 'undefined') {
+        return res.status(401).json({ success: false, error: 'Not authorized, invalid token provided' });
+      }
+
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'swasthyasetu_super_secret_key_2026_jwt');
 

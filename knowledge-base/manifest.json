@@ -1,0 +1,62 @@
+[
+  {
+    "documentId": "doc_nhm_headache_triage_2026",
+    "filename": "guidelines_headache_triage.md",
+    "title": "Clinical Triage and Care Navigation Guidelines for Acute Headaches",
+    "publisher": "National Health Mission / Ministry of Health (Sample Reference)",
+    "sourceUrl": "https://mohfw.gov.in/guidelines/headache-navigation-sample",
+    "publicationDate": "2026-01-15",
+    "language": "en",
+    "topic": "triage_neurology",
+    "version": "1.2",
+    "reviewStatus": "approved"
+  },
+  {
+    "documentId": "doc_who_fever_management_2026",
+    "filename": "guidelines_fever_management.txt",
+    "title": "Community Health Worker Fever Evaluation and Home Monitoring Protocol",
+    "publisher": "World Health Organization (Sample Reference)",
+    "sourceUrl": "https://who.int/publications/fever-evaluation-protocol-sample",
+    "publicationDate": "2025-11-20",
+    "language": "en",
+    "topic": "infectious_disease",
+    "version": "2.0",
+    "reviewStatus": "approved"
+  },
+  {
+    "documentId": "doc_cardio_hypertension_protocol_2026",
+    "filename": "who_hypertension_care.md",
+    "title": "Primary Healthcare Hypertension Screening and Referral Protocol",
+    "publisher": "Public Health Clinical Council (Sample Reference)",
+    "sourceUrl": "https://clinicalcouncil.org/guidelines/hypertension-sample",
+    "publicationDate": "2026-02-10",
+    "language": "en",
+    "topic": "cardiovascular",
+    "version": "1.0",
+    "reviewStatus": "approved"
+  },
+  {
+    "documentId": "doc_pdf_clinical_dehydration_2026",
+    "filename": "sample_clinical_protocol.pdf",
+    "title": "Clinical Dehydration Management and Oral Rehydration Guidelines",
+    "publisher": "Public Health Emergency Directorate (Sample Reference)",
+    "sourceUrl": "https://mohfw.gov.in/guidelines/dehydration-protocol-sample.pdf",
+    "publicationDate": "2026-03-01",
+    "language": "en",
+    "topic": "emergency_medicine",
+    "version": "1.0",
+    "reviewStatus": "approved"
+  },
+  {
+    "documentId": "doc_unapproved_experimental_draft",
+    "filename": "unapproved_draft_notes.txt",
+    "title": "Unreviewed Community Draft Notes on Home Remedies",
+    "publisher": "Independent Contributor (Pending Review)",
+    "sourceUrl": null,
+    "publicationDate": null,
+    "language": "en",
+    "topic": "general_wellness",
+    "version": "0.1",
+    "reviewStatus": "pending"
+  }
+]

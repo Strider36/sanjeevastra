@@ -52,10 +52,47 @@ const SosRequestSchema = new mongoose.Schema({
     currentLat: { type: Number, default: null },
     currentLng: { type: Number, default: null }
   },
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: [73.8567, 18.5204]
+    }
+  },
+  assignedResponder: {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    name: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    responderType: { type: String, default: '' },
+    etaMinutes: { type: Number, default: 0 },
+    acceptedAt: { type: Date, default: null }
+  },
+  declinedResponders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
   status: {
     type: String,
-    enum: ['REQUESTED', 'ACCEPTED', 'EN_ROUTE', 'ARRIVED', 'CANCELLED', 'COMPLETED'],
+    enum: ['REQUESTED', 'ACCEPTED', 'EN_ROUTE', 'ARRIVED', 'RESOLVED', 'CANCELLED', 'COMPLETED', 'ESCALATED'],
     default: 'REQUESTED'
+  },
+  escalatedAt: {
+    type: Date,
+    default: null
+  },
+  resolvedAt: {
+    type: Date,
+    default: null
+  },
+  resolutionNote: {
+    type: String,
+    default: ''
   },
   isOfflineQueued: {
     type: Boolean,
@@ -71,5 +108,9 @@ const SosRequestSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+SosRequestSchema.index({ patient: 1, createdAt: -1 });
+SosRequestSchema.index({ status: 1, createdAt: -1 });
+SosRequestSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('SosRequest', SosRequestSchema);

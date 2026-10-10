@@ -120,6 +120,40 @@
         <input type="password" id="confirm-password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
       </div>
       
+      <div class="form-group">
+        <label for="account-role" class="form-label">Account Type</label>
+        <select id="account-role" class="form-control" style="font-weight: 600;">
+          <option value="patient" selected>Patient (Personal Health Vault)</option>
+          <option value="doctor">Doctor / Healthcare Professional</option>
+        </select>
+      </div>
+
+      <!-- Doctor Credentials Section (shown only when Doctor is selected) -->
+      <div id="doctor-fields-wrapper" style="display: none; background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>🩺</span> Professional Medical Credentials
+        </div>
+
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label for="doc-license" class="form-label" style="font-size: 0.8rem;">State / National Medical Council ID (NMC)</label>
+          <input type="text" id="doc-license" class="form-control" placeholder="e.g. MCI-49210 / MMC-2018-842">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label for="doc-specialization" class="form-label" style="font-size: 0.8rem;">Clinical Specialization</label>
+          <input type="text" id="doc-specialization" class="form-control" placeholder="e.g. General Medicine, Cardiology, Pediatrics">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 8px;">
+          <label for="doc-hospital" class="form-label" style="font-size: 0.8rem;">Hospital / Clinic Affiliation</label>
+          <input type="text" id="doc-hospital" class="form-control" placeholder="e.g. AIIMS New Delhi, Apollo Hospital">
+        </div>
+
+        <div style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.35; margin-top: 6px;">
+          ℹ️ <strong>Security Verification Notice</strong>: Unverified doctor accounts cannot access patient medical records. An administrator will review your medical credentials.
+        </div>
+      </div>
+      
       <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 600; margin-top: 8px;">
         <span data-i18n="auth.signUpBtn">Register Account</span>
       </button>

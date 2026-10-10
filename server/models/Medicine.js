@@ -66,4 +66,6 @@ const MedicineSchema = new mongoose.Schema({
   timestamps: true
 });
 
+MedicineSchema.index({ user: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Medicine', MedicineSchema);

@@ -4,6 +4,7 @@ import { apiFetch, showToast } from './api.js';
 let activeTab = 'medicine'; // 'medicine' or 'prescription'
 let selectedFile = null;
 let rxMedicines = [];
+let lastRawOcrText = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
@@ -150,6 +151,10 @@ async function runOCR(file) {
 
     const { data: { text } } = await worker.recognize(file);
     await worker.terminate();
+
+    lastRawOcrText = text;
+    const rawPreview = document.getElementById('scan-rx-raw-text');
+    if (rawPreview) rawPreview.textContent = text || 'No text extracted';
 
     loader.style.display = 'none';
     
@@ -412,6 +417,11 @@ function setupFormSubmissions() {
       formData.append('date', date);
       formData.append('notes', notes);
       formData.append('medicines', JSON.stringify(medsList));
+      formData.append('rawOcrText', lastRawOcrText);
+
+      const syncRecords = document.getElementById('scan-rx-sync-records');
+      formData.append('saveToRecords', syncRecords && syncRecords.checked ? 'true' : 'false');
+
       if (selectedFile) {
         formData.append('file', selectedFile);
       }

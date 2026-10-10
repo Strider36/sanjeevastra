@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['patient', 'health_worker', 'admin'],
+    enum: ['patient', 'doctor', 'health_worker', 'admin'],
     default: 'patient'
   },
   phone: {
@@ -68,6 +68,21 @@ const UserSchema = new mongoose.Schema({
       phone: { type: String, required: true }
     }
   ],
+  location: {
+    type: {
+      type: String,
+      enum: ['Point']
+    },
+    coordinates: [Number]
+  },
+  locationAddress: {
+    type: String,
+    default: ''
+  },
+  lastActiveAt: {
+    type: Date,
+    default: Date.now
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -76,10 +91,15 @@ const UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
+UserSchema.index({ location: '2dsphere' }, { sparse: true });
+
 // Encrypt password using bcrypt
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function () {
+  if (this.location && (!this.location.coordinates || this.location.coordinates.length < 2)) {
+    this.location = undefined;
+  }
   if (!this.isModified('password')) {
-    next();
+    return;
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

@@ -1,4 +1,5 @@
 const Prescription = require('../models/Prescription');
+const HealthRecord = require('../models/HealthRecord');
 const fs = require('fs');
 const path = require('path');
 
@@ -14,12 +15,12 @@ exports.getPrescriptions = async (req, res) => {
   }
 };
 
-// @desc    Create new prescription (with optional upload)
+// @desc    Create new prescription (with optional upload & Health Record synchronization)
 // @route   POST /api/prescriptions
 // @access  Private
 exports.createPrescription = async (req, res) => {
   try {
-    const { doctorName, hospitalName, date, notes } = req.body;
+    const { doctorName, hospitalName, date, notes, rawOcrText, saveToRecords } = req.body;
     let medicines = [];
 
     // Parse medicines from body (might be sent as stringified JSON)
@@ -38,6 +39,31 @@ exports.createPrescription = async (req, res) => {
       fileUrl = `/uploads/${req.file.filename}`;
     }
 
+    // Automatically create linked HealthRecord if a file was uploaded
+    let healthRecordId = null;
+    if (fileUrl && saveToRecords !== 'false') {
+      try {
+        const medSummary = medicines.map(m => m.name + (m.dosage ? ` (${m.dosage})` : '')).join(', ');
+        const recordNotes = [
+          notes ? `Notes: ${notes}` : '',
+          hospitalName ? `Facility: ${hospitalName}` : '',
+          medSummary ? `Prescribed: ${medSummary}` : ''
+        ].filter(Boolean).join(' • ');
+
+        const hr = await HealthRecord.create({
+          user: req.user.id,
+          name: `Prescription - ${doctorName || 'Doctor'} (${new Date(date || Date.now()).toLocaleDateString()})`,
+          category: 'Prescription',
+          date: date || new Date(),
+          fileUrl,
+          notes: recordNotes
+        });
+        healthRecordId = hr._id;
+      } catch (hrErr) {
+        console.warn('Could not auto-create linked HealthRecord:', hrErr.message);
+      }
+    }
+
     const prescription = await Prescription.create({
       user: req.user.id,
       doctorName: doctorName || 'Unknown Doctor',
@@ -45,10 +71,12 @@ exports.createPrescription = async (req, res) => {
       date: date || new Date(),
       medicines,
       fileUrl,
-      notes: notes || ''
+      notes: notes || '',
+      rawOcrText: rawOcrText || '',
+      healthRecord: healthRecordId
     });
 
-    res.status(201).json({ success: true, data: prescription });
+    res.status(201).json({ success: true, data: prescription, linkedRecordId: healthRecordId });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

@@ -52,6 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle Registration Submission
   const registerForm = document.getElementById('register-form');
+  const roleSelect = document.getElementById('account-role');
+  const doctorFieldsWrapper = document.getElementById('doctor-fields-wrapper');
+
+  if (roleSelect && doctorFieldsWrapper) {
+    roleSelect.addEventListener('change', () => {
+      doctorFieldsWrapper.style.display = roleSelect.value === 'doctor' ? 'block' : 'none';
+    });
+  }
+
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -60,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirm-password').value;
+      const role = roleSelect ? roleSelect.value : 'patient';
 
       if (!name || !email || !password) {
         showToast('Input Error', 'Please complete all required fields', 'error');
@@ -76,6 +86,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      const payload = { name, email, password, role };
+      if (role === 'doctor') {
+        const licenseNumber = document.getElementById('doc-license')?.value.trim();
+        const specialization = document.getElementById('doc-specialization')?.value.trim();
+        const hospitalAffiliation = document.getElementById('doc-hospital')?.value.trim();
+
+        if (!licenseNumber) {
+          showToast('Credential Required', 'Medical License / Registration Number is required for doctor accounts', 'warning');
+          return;
+        }
+
+        payload.licenseNumber = licenseNumber;
+        payload.specialization = specialization;
+        payload.hospitalAffiliation = hospitalAffiliation;
+      }
+
       // Show loader
       const submitBtn = registerForm.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
@@ -84,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const result = await apiFetch('/auth/register', {
         method: 'POST',
-        body: { name, email, password }
+        body: payload
       });
 
       submitBtn.innerHTML = originalText;
@@ -93,10 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.success) {
         setToken(result.token);
         localStorage.setItem('user', JSON.stringify(result.user));
-        showToast('Registration Successful', 'Account created successfully!', 'success');
+        const successMsg = role === 'doctor' 
+          ? 'Doctor profile created! Credential verification is pending administrative review.' 
+          : 'Account created successfully!';
+        showToast('Registration Successful', successMsg, 'success');
         setTimeout(() => {
           window.location.href = '/dashboard.html';
-        }, 1000);
+        }, 1200);
       } else {
         showToast('Sign Up Failed', result.error, 'error');
       }

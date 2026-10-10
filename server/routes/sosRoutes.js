@@ -13,10 +13,20 @@ const {
   cancelSos,
   getNearbyFacilities,
   getAvailableAmbulances,
-  assignAmbulance
+  assignAmbulance,
+  acceptSos,
+  declineSos,
+  markEnRoute,
+  resolveSos,
+  escalateSos,
+  optInResponder,
+  optOutResponder,
+  getResponderProfile,
+  getNearbyActiveAlerts,
+  updateUserLocation
 } = require('../controllers/sosController');
 
-// Optional protect middleware for createSos so both logged-in and urgent guest requests are supported
+// Optional protect middleware for createSos & escalateSos so guest emergency requests are supported
 const optionalProtect = async (req, res, next) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -35,10 +45,19 @@ const optionalProtect = async (req, res, next) => {
 router.get('/facilities/nearby', getNearbyFacilities);
 router.get('/ambulances/available', getAvailableAmbulances);
 
+// Live User Geolocation Sync
+router.post('/user-location', protect, updateUserLocation);
+
 // Emergency SOS creation (supports authenticated or guest)
 router.post('/', optionalProtect, createSos);
 
-// Authenticated SOS management
+// Responder Opt-In, Opt-Out & Availability Controls
+router.post('/responder/opt-in', protect, optInResponder);
+router.post('/responder/opt-out', protect, optOutResponder);
+router.get('/responder/profile', protect, getResponderProfile);
+router.get('/responder/active-alerts', protect, getNearbyActiveAlerts);
+
+// Authenticated SOS management & responder actions
 router.get('/', protect, getSosRequests);
 router.get('/active', protect, getActiveSos);
 router.get('/:id', protect, getSosById);
@@ -46,5 +65,12 @@ router.get('/patient/:patientId', protect, getPatientSosHistory);
 router.patch('/:id/status', protect, updateSosStatus);
 router.post('/:id/cancel', protect, cancelSos);
 router.post('/:id/assign-ambulance', protect, assignAmbulance);
+
+// Responder Action Lifecycles (Single Acceptance, Decline, En Route, Resolve, Escalation)
+router.post('/:id/accept', protect, acceptSos);
+router.post('/:id/decline', protect, declineSos);
+router.post('/:id/en-route', protect, markEnRoute);
+router.post('/:id/resolve', protect, resolveSos);
+router.post('/:id/escalate', optionalProtect, escalateSos);
 
 module.exports = router;

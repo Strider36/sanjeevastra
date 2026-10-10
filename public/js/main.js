@@ -2,6 +2,7 @@
 import { isAuthenticated, apiFetch, logout, initTheme } from './api.js';
 import { initI18n, t, renderLanguageSelector, translateDOM } from './i18n.js';
 import { triggerMedicalSos } from './sos.js';
+import './networkStatus.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Session Guard: Check authorization status
@@ -39,6 +40,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 7. Fetch Notifications & Reminders
   loadNotifications();
+
+  // 8. Sync Live Location & Start Real-Time Emergency Alert Polling
+  syncLiveUserLocation();
+  setInterval(() => {
+    loadNotifications(true);
+  }, 7000);
 
   // 8. Listen to language changes to re-render navigation immediately
   window.addEventListener('swasthya:languageChanged', () => {
@@ -236,10 +243,38 @@ function registerNavHandlers() {
 }
 
 // Load and render dynamic notifications
-export async function loadNotifications() {
+// Sync Live Geolocation to Backend for Nearby SOS notifications
+function syncLiveUserLocation() {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        await apiFetch('/sos/user-location', {
+          method: 'POST',
+          body: {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            locationAddress: 'Live Browser Coordinates'
+          }
+        });
+      } catch (e) {
+        // Silent background sync
+      }
+    },
+    (err) => {
+      // Permission prompt ignored or denied
+    },
+    { timeout: 8000, enableHighAccuracy: false }
+  );
+}
+
+// Track alerts already sounded in current session
+const soundedAlertIds = new Set();
+
+// Load and render dynamic notifications with Real-Time Emergency Alerts
+export async function loadNotifications(isBackgroundPoll = false) {
   const badge = document.getElementById('notification-badge');
   const list = document.getElementById('notifications-list');
-  if (!list) return;
 
   const response = await apiFetch('/notifications');
   if (response.success) {
@@ -251,21 +286,41 @@ export async function loadNotifications() {
       if (badge) badge.style.display = 'none';
     }
 
+    // Check for nearby unread EMERGENCY alerts
+    const unreadEmergency = unread.find(n => n.type === 'Emergency');
+    if (unreadEmergency) {
+      if (!soundedAlertIds.has(unreadEmergency._id)) {
+        soundedAlertIds.add(unreadEmergency._id);
+        triggerReminderAudio(true);
+        showNearbyEmergencyBanner(unreadEmergency);
+      }
+    }
+
+    if (!list) return;
+
     if (response.data.length === 0) {
       list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 12px;">No reminders found</div>`;
       return;
     }
 
     list.innerHTML = response.data
-      .map(item => `
-        <div class="notification-item" style="padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background-color: ${item.isRead ? 'transparent' : 'rgba(var(--primary-rgb), 0.03)'}; display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; cursor: pointer;" data-id="${item._id}">
-          <div style="font-weight: 600; display: flex; justify-content: space-between;">
-            <span>${item.title}</span>
-            <span style="font-size: 0.7rem; color: var(--text-secondary);">${new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      .map(item => {
+        const isEmergency = item.type === 'Emergency';
+        const bgStyle = isEmergency
+          ? 'background: rgba(239, 68, 68, 0.1); border: 1.5px solid #EF4444;'
+          : (item.isRead ? 'background: transparent; border: 1px solid var(--border);' : 'background: rgba(var(--primary-rgb), 0.03); border: 1px solid var(--border);');
+
+        return `
+          <div class="notification-item ${isEmergency ? 'notification-emergency' : ''}" style="padding: 10px; border-radius: var(--radius-sm); ${bgStyle} display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; cursor: pointer; transition: var(--transition);" data-id="${item._id}">
+            <div style="font-weight: 700; display: flex; justify-content: space-between; align-items: center; color: ${isEmergency ? '#DC2626' : 'inherit'};">
+              <span>${isEmergency ? '🚨 ' : ''}${item.title}</span>
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: normal;">${new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <div style="color: ${isEmergency ? 'var(--text-primary)' : 'var(--text-secondary)'}; font-size: 0.8rem; line-height: 1.35;">${item.message}</div>
+            ${isEmergency ? `<div style="font-size: 0.75rem; color: #DC2626; font-weight: 600; margin-top: 4px;">⚡ Nearby Community Emergency • Click to view</div>` : ''}
           </div>
-          <div style="color: var(--text-secondary);">${item.message}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
     // Bind read action triggers on notification click
     list.querySelectorAll('.notification-item').forEach(el => {
@@ -277,28 +332,101 @@ export async function loadNotifications() {
         }
       });
     });
-  } else {
+  } else if (!isBackgroundPoll && list) {
     list.innerHTML = `<div style="text-align: center; color: var(--error); font-size: 0.8rem; padding: 12px;">Failed to load alerts</div>`;
   }
 }
 
-// Trigger browser reminders dynamically
-export function triggerReminderAudio() {
+// Display prominent top floating Emergency Alert Banner for nearby SOS
+function showNearbyEmergencyBanner(alert) {
+  const existing = document.getElementById('nearby-emergency-floating-banner');
+  if (existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'nearby-emergency-floating-banner';
+  banner.style.position = 'fixed';
+  banner.style.top = '16px';
+  banner.style.left = '50%';
+  banner.style.transform = 'translateX(-50%)';
+  banner.style.zIndex = '9999';
+  banner.style.maxWidth = '620px';
+  banner.style.width = 'calc(100% - 32px)';
+  banner.style.background = 'linear-gradient(135deg, #DC2626, #991B1B)';
+  banner.style.color = '#FFFFFF';
+  banner.style.borderRadius = 'var(--radius-lg, 12px)';
+  banner.style.boxShadow = '0 10px 25px -5px rgba(220, 38, 38, 0.5), 0 8px 10px -6px rgba(220, 38, 38, 0.5)';
+  banner.style.padding = '16px 20px';
+  banner.style.display = 'flex';
+  banner.style.flexDirection = 'column';
+  banner.style.gap = '10px';
+  banner.style.animation = 'pulse 2s infinite ease-in-out';
+
+  banner.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.8rem; line-height: 1;">🚨</span>
+        <div>
+          <div style="font-weight: 800; font-size: 1rem; letter-spacing: -0.01em;">${alert.title || 'COMMUNITY EMERGENCY SOS NEAR YOU'}</div>
+          <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.95); margin-top: 3px; line-height: 1.35;">${alert.message}</div>
+        </div>
+      </div>
+      <button id="btn-close-emergency-banner" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">&times;</button>
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;">
+      <button id="btn-dismiss-emergency" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 500;">Dismiss</button>
+      <a href="/sos-admin.html" style="background: white; color: #DC2626; font-weight: 700; padding: 6px 16px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+        <span>🚑</span> View Live Dispatch Board →
+      </a>
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+
+  const dismiss = async () => {
+    banner.remove();
+    await apiFetch(`/notifications/${alert._id}/read`, { method: 'PUT' });
+    loadNotifications();
+  };
+
+  banner.querySelector('#btn-close-emergency-banner')?.addEventListener('click', dismiss);
+  banner.querySelector('#btn-dismiss-emergency')?.addEventListener('click', dismiss);
+}
+
+// Trigger audible reminder tone dynamically (urgent siren for emergency)
+export function triggerReminderAudio(isEmergency = false) {
   try {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
     
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.3); // play for 300ms
+    if (isEmergency) {
+      // Urgent high-pitch double warble for emergency alerts
+      const playTone = (freq, start, duration) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime + start);
+        gain.gain.setValueAtTime(0.15, audioContext.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + start + duration);
+        osc.start(audioContext.currentTime + start);
+        osc.stop(audioContext.currentTime + start + duration);
+      };
+      playTone(950, 0, 0.25);
+      playTone(1200, 0.3, 0.25);
+      playTone(950, 0.6, 0.25);
+      playTone(1200, 0.9, 0.35);
+    } else {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.3);
+    }
   } catch (err) {
-    console.log('AudioContext not allowed or not supported yet:', err);
+    console.log('AudioContext notification tone note:', err);
   }
 }

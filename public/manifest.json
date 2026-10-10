@@ -1,12 +1,28 @@
 {
-  "name": "Sanjeev Astra - AI-Powered Healthcare Navigation",
+  "name": "Sanjeev Astra - AI Healthcare Navigation",
   "short_name": "Sanjeev Astra",
-  "description": "Sanjeev Astra is an AI-powered healthcare navigation platform that helps patients describe their health problems, understand the appropriate level of care, discover nearby healthcare facilities, and access emergency assistance when required.",
+  "id": "/",
+  "description": "Evidence-grounded healthcare navigation, emergency medical dispatch, offline medical records, and AI assistance.",
   "start_url": "/dashboard.html",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#0284c7",
+  "categories": ["health", "medical", "navigation"],
   "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",

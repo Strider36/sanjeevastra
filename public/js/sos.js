@@ -79,7 +79,7 @@ class SosManager {
   // Check if active SOS already exists for this patient
   async checkActiveSos() {
     try {
-      const token = localStorage.getItem('token');
+      const token = typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function' ? localStorage.getItem('token') : null;
       if (!token) return;
 
       const res = await apiFetch('/sos/active');
@@ -119,11 +119,15 @@ class SosManager {
       </div>
     `;
 
-    document.body.appendChild(modalRoot);
+    if (document.body && typeof document.body.appendChild === 'function') {
+      document.body.appendChild(modalRoot);
+    }
 
     // Bind close events
     const closeBtn = modalRoot.querySelector('#sos-modal-close');
-    closeBtn.addEventListener('click', () => this.closeModal());
+    if (closeBtn && typeof closeBtn.addEventListener === 'function') {
+      closeBtn.addEventListener('click', () => this.closeModal());
+    }
 
     modalRoot.addEventListener('click', (e) => {
       if (e.target === modalRoot) {
@@ -228,7 +232,7 @@ class SosManager {
     const body = document.getElementById('sos-modal-body');
     if (!body) return;
 
-    if (this.activeSos && ['REQUESTED', 'ACCEPTED', 'EN_ROUTE', 'ARRIVED'].includes(this.activeSos.status)) {
+    if (this.activeSos && ['REQUESTED', 'ACCEPTED', 'EN_ROUTE', 'ARRIVED', 'ESCALATED'].includes(this.activeSos.status)) {
       this.renderActiveTrackingView(body);
     } else {
       this.renderInitialEmergencyView(body);
@@ -471,7 +475,9 @@ class SosManager {
 
       if (res && res.success && res.data) {
         this.activeSos = res.data;
-        showToast(t('common.success'), t('sos.requestCreatedTitle'), 'success');
+        const count = res.meta ? (res.meta.totalNotifiedCount || res.meta.notifiedUsersCount || res.meta.notifiedRespondersCount) : null;
+        const msg = count ? `Emergency alert broadcasted! Notified ${count} nearby community users & emergency responders.` : t('sos.requestCreatedTitle');
+        showToast(t('common.success'), msg, 'success');
         this.renderModalContent();
         this.updateActiveSosBanner();
       } else {
@@ -494,12 +500,79 @@ class SosManager {
       EN_ROUTE: { label: t('sos.statusEnRoute'), color: 'badge-primary', step: 3 },
       ARRIVED: { label: t('sos.statusArrived'), color: 'badge-success', step: 4 },
       COMPLETED: { label: t('sos.statusCompleted'), color: 'badge-success', step: 5 },
+      RESOLVED: { label: 'RESOLVED', color: 'badge-success', step: 5 },
+      ESCALATED: { label: 'ESCALATED (DIAL 112 / 108)', color: 'badge-danger', step: 1 },
       CANCELLED: { label: t('sos.statusCancelled'), color: 'badge-danger', step: 0 }
     };
 
     const currentStatusMeta = statusLabels[sos.status] || statusLabels.REQUESTED;
+    const isEscalated = sos.status === 'ESCALATED';
+    const hasResponder = sos.assignedResponder && (sos.assignedResponder.name || sos.assignedResponder.user);
 
     container.innerHTML = `
+      ${sos.isOfflineQueued ? `
+        <!-- Offline Emergency Warning Banner -->
+        <div style="background: rgba(239, 68, 68, 0.15); border: 2px solid #EF4444; border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 8px; align-items: center; color: #DC2626; font-weight: 800; font-size: 1.05rem;">
+            <span>⚠️</span> DEVICE IS OFFLINE — EMERGENCY NOT DELIVERED TO SERVER
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-primary); margin: 8px 0 14px; line-height: 1.5;">
+            Your browser cannot dispatch ambulances or notify responders while disconnected from the network. <strong>Please use your device's telephone dialer immediately to call emergency response:</strong>
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="tel:112" class="btn" style="background: #EF4444; color: white; flex: 1; text-align: center; font-weight: 700; padding: 12px; border-radius: var(--radius-md); text-decoration: none; font-size: 0.95rem;">
+              📞 Call 112 (National Emergency)
+            </a>
+            <a href="tel:108" class="btn" style="background: #2563EB; color: white; flex: 1; text-align: center; font-weight: 700; padding: 12px; border-radius: var(--radius-md); text-decoration: none; font-size: 0.95rem;">
+              🚑 Call 108 (Ambulance Dispatch)
+            </a>
+          </div>
+        </div>
+      ` : ''}
+
+      ${isEscalated ? `
+        <!-- Direct Emergency Escalation Alert -->
+        <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #EF4444; border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 8px; align-items: center; color: #DC2626; font-weight: 700; font-size: 1rem;">
+            <span>🚨</span> NATIONAL EMERGENCY ESCALATION
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-primary); margin: 6px 0 14px; line-height: 1.45;">
+            No local community responders were able to accept within the timeout window. For immediate life-saving care, please call national emergency dispatch services immediately:
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <a href="tel:112" class="btn" style="background: #EF4444; color: white; flex: 1; text-align: center; font-weight: 700; padding: 12px; border-radius: var(--radius-md); text-decoration: none; font-size: 0.9rem;">
+              📞 Call 112 (National Emergency)
+            </a>
+            <a href="tel:108" class="btn" style="background: #2563EB; color: white; flex: 1; text-align: center; font-weight: 700; padding: 12px; border-radius: var(--radius-md); text-decoration: none; font-size: 0.9rem;">
+              🚑 Call 108 (Ambulance)
+            </a>
+          </div>
+        </div>
+      ` : ''}
+
+      ${hasResponder ? `
+        <!-- Community First Responder Card -->
+        <div style="padding: 14px 18px; border: 1.5px solid var(--primary); border-radius: var(--radius-md); background: rgba(59, 130, 246, 0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+              <span>🛡️</span> Assigned Community First Responder
+            </div>
+            <div style="font-weight: 700; font-size: 1.05rem; margin-top: 2px;">
+              ${sos.assignedResponder.name || 'Nearby Responder'}
+              <span class="badge badge-info" style="font-size: 0.65rem; text-transform: capitalize; margin-left: 6px;">${sos.assignedResponder.responderType || 'first responder'}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
+              ${sos.assignedResponder.phone ? `Phone: <a href="tel:${sos.assignedResponder.phone}" style="color: var(--primary); font-weight: 600;">${sos.assignedResponder.phone}</a> • ` : ''}
+              Accepted At: ${sos.assignedResponder.acceptedAt ? new Date(sos.assignedResponder.acceptedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.72rem; color: var(--text-secondary);">Responder ETA</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">~${sos.assignedResponder.etaMinutes || 5} min</div>
+          </div>
+        </div>
+      ` : ''}
+
       <!-- Emergency Header Status -->
       <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1025,6 +1098,20 @@ class SosManager {
       if (!Array.isArray(queue) || queue.length === 0) return;
 
       const item = queue.shift(); // process first pending SOS
+
+      // Prevent stale queued emergency alerts from triggering dispatch hours later
+      const createdAtMs = item.createdAt ? new Date(item.createdAt).getTime() : Date.now();
+      const ageMinutes = (Date.now() - createdAtMs) / (60 * 1000);
+      if (ageMinutes > 20) {
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+        showToast(
+          'Emergency Alert Expired',
+          'Queued SOS alert was older than 20 minutes and has been expired. Please call 112 directly if you still require immediate assistance.',
+          'warning'
+        );
+        return;
+      }
+
       const res = await apiFetch('/sos', {
         method: 'POST',
         body: item

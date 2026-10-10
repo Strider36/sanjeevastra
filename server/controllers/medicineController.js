@@ -46,7 +46,7 @@ exports.createMedicine = async (req, res) => {
 // @access  Private
 exports.updateMedicine = async (req, res) => {
   try {
-    let medicine = await Medicine.findById(medicineId = req.params.id);
+    let medicine = await Medicine.findById(req.params.id);
 
     if (!medicine) {
       return res.status(404).json({ success: false, error: 'Medicine not found' });
@@ -57,7 +57,10 @@ exports.updateMedicine = async (req, res) => {
       return res.status(401).json({ success: false, error: 'Not authorized' });
     }
 
-    medicine = await Medicine.findByIdAndUpdate(req.params.id, req.body, {
+    const updates = { ...req.body };
+    delete updates.user; // Prevent changing ownership
+
+    medicine = await Medicine.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true
     });
